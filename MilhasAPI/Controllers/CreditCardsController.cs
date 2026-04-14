@@ -21,13 +21,13 @@ public class CreditCardsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CreditCard>>> Get()
     {
-        return await _db.CreditCards.Include(c => c.User).ToListAsync();
+        return await _db.CreditCards.ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<CreditCard>> Get(int id)
     {
-        var card = await _db.CreditCards.Include(c => c.User).FirstOrDefaultAsync(c => c.Id == id);
+        var card = await _db.CreditCards.FirstOrDefaultAsync(c => c.Id == id);
         if (card == null) return NotFound();
         return card;
     }

@@ -33,8 +33,20 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<User>> Post(User user)
+    public async Task<ActionResult<User>> Post(CreateUserDto dto)
     {
+        var user = new User
+        {
+            Name = dto.Name,
+            Email = dto.Email
+        };
+
+        // Credit cards are optional when creating a user. Only attach them if provided.
+        if (dto.CreditCards != null && dto.CreditCards.Count > 0)
+        {
+            user.CreditCards = dto.CreditCards;
+        }
+
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
