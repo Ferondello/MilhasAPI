@@ -1,14 +1,8 @@
-using System.Text.Json.Serialization;
-
 namespace MilhasAPI.Models;
 
-public class CreditCard
+public class CreateCreditCardDto
 {
-    public int Id { get; private set; }
     public string CardNumber { get; set; } = null!;
     public string Brand { get; set; } = null!;
     public int UserId { get; set; }
-
-    [JsonIgnore]
-    public User? User { get; set; }
 }

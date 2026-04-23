@@ -27,33 +27,39 @@ public class CreditCardsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<CreditCard>> Get(int id)
     {
-        var card = await _db.CreditCards.FirstOrDefaultAsync(c => c.Id == id);
+        var card = await _db.CreditCards.FindAsync(id);
         if (card == null) return NotFound();
         return card;
     }
 
     [HttpPost]
-    public async Task<ActionResult<CreditCard>> Post(CreditCard card)
+    public async Task<ActionResult<CreditCard>> Post(CreateCreditCardDto dto)
     {
+        if (!await _db.Users.AnyAsync(u => u.Id == dto.UserId))
+            return NotFound("Usuário não encontrado.");
+
+        var card = new CreditCard
+        {
+            CardNumber = dto.CardNumber,
+            Brand = dto.Brand,
+            UserId = dto.UserId
+        };
+
         _db.CreditCards.Add(card);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = card.Id }, card);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, CreditCard updated)
+    public async Task<IActionResult> Put(int id, UpdateCreditCardDto dto)
     {
-        if (id != updated.Id) return BadRequest();
-        _db.Entry(updated).State = EntityState.Modified;
-        try
-        {
-            await _db.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await _db.CreditCards.AnyAsync(c => c.Id == id)) return NotFound();
-            throw;
-        }
+        var card = await _db.CreditCards.FindAsync(id);
+        if (card == null) return NotFound();
+
+        if (dto.CardNumber != null) card.CardNumber = dto.CardNumber;
+        if (dto.Brand != null) card.Brand = dto.Brand;
+
+        await _db.SaveChangesAsync();
         return NoContent();
     }
 

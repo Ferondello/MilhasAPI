@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +22,13 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> Get()
     {
-        return await _db.Users.Include(u => u.CreditCards).ToListAsync();
+        return await _db.Users.Include(u => u.CreditCards).Include(u => u.Profile).ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> Get(int id)
     {
-        var user = await _db.Users.Include(u => u.CreditCards).FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _db.Users.Include(u => u.CreditCards).Include(u => u.Profile).FirstOrDefaultAsync(u => u.Id == id);
         if (user == null) return NotFound();
         return user;
     }
@@ -41,10 +42,13 @@ public class UsersController : ControllerBase
             Email = dto.Email
         };
 
-        // Credit cards are optional when creating a user. Only attach them if provided.
         if (dto.CreditCards != null && dto.CreditCards.Count > 0)
         {
-            user.CreditCards = dto.CreditCards;
+            user.CreditCards = dto.CreditCards.Select(c => new CreditCard
+            {
+                CardNumber = c.CardNumber,
+                Brand = c.Brand
+            }).ToList();
         }
 
         _db.Users.Add(user);
@@ -53,19 +57,15 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, User updated)
+    public async Task<IActionResult> Put(int id, UpdateUserDto dto)
     {
-        if (id != updated.Id) return BadRequest();
-        _db.Entry(updated).State = EntityState.Modified;
-        try
-        {
-            await _db.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await _db.Users.AnyAsync(u => u.Id == id)) return NotFound();
-            throw;
-        }
+        var user = await _db.Users.FindAsync(id);
+        if (user == null) return NotFound();
+
+        if (dto.Name != null) user.Name = dto.Name;
+        if (dto.Email != null) user.Email = dto.Email;
+
+        await _db.SaveChangesAsync();
         return NoContent();
     }
 
