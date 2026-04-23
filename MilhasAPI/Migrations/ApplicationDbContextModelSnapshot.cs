@@ -45,7 +45,7 @@ namespace MilhasAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CreditCards");
+                    b.ToTable("CreditCards", (string)null);
                 });
 
             modelBuilder.Entity("MilhasAPI.Models.RewardTransaction", b =>
@@ -77,7 +77,7 @@ namespace MilhasAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RewardTransactions");
+                    b.ToTable("RewardTransactions", (string)null);
                 });
 
             modelBuilder.Entity("MilhasAPI.Models.User", b =>
@@ -98,7 +98,7 @@ namespace MilhasAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("MilhasAPI.Models.UserProfile", b =>
@@ -162,7 +162,7 @@ namespace MilhasAPI.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfiles");
+                    b.ToTable("UserProfiles", (string)null);
                 });
 
             modelBuilder.Entity("MilhasAPI.Models.CreditCard", b =>
