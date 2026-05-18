@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MilhasAPI.Data;
 using MilhasAPI.Models;
+using MilhasAPI.Services.Interfaces;
 
 namespace MilhasAPI.Controllers;
 
@@ -11,57 +8,41 @@ namespace MilhasAPI.Controllers;
 [Route("api/[controller]")]
 public class RewardTransactionsController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IRewardTransactionService _transactionService;
 
-    public RewardTransactionsController(ApplicationDbContext db)
+    public RewardTransactionsController(IRewardTransactionService transactionService)
     {
-        _db = db;
+        _transactionService = transactionService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RewardTransaction>>> Get()
-    {
-        return await _db.RewardTransactions
-            .Include(r => r.User)
-            .Include(r => r.CreditCard)
-            .ToListAsync();
-    }
+        => Ok(await _transactionService.GetAllAsync());
 
     [HttpGet("{id}")]
     public async Task<ActionResult<RewardTransaction>> Get(int id)
     {
-        var tx = await _db.RewardTransactions
-            .Include(r => r.User)
-            .Include(r => r.CreditCard)
-            .FirstOrDefaultAsync(r => r.Id == id);
+        var tx = await _transactionService.GetByIdAsync(id);
         if (tx == null) return NotFound();
-        return tx;
+        return Ok(tx);
     }
 
     [HttpGet("user/{userId}")]
     public async Task<ActionResult<IEnumerable<RewardTransaction>>> GetByUser(int userId)
-    {
-        return await _db.RewardTransactions
-            .Include(r => r.CreditCard)
-            .Where(r => r.UserId == userId)
-            .ToListAsync();
-    }
+        => Ok(await _transactionService.GetByUserIdAsync(userId));
 
     [HttpPost]
     public async Task<ActionResult<RewardTransaction>> Post(RewardTransaction tx)
     {
-        _db.RewardTransactions.Add(tx);
-        await _db.SaveChangesAsync();
-        return CreatedAtAction(nameof(Get), new { id = tx.Id }, tx);
+        var created = await _transactionService.CreateAsync(tx);
+        return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var tx = await _db.RewardTransactions.FindAsync(id);
-        if (tx == null) return NotFound();
-        _db.RewardTransactions.Remove(tx);
-        await _db.SaveChangesAsync();
+        var deleted = await _transactionService.DeleteAsync(id);
+        if (!deleted) return NotFound();
         return NoContent();
     }
 }

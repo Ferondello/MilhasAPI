@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MilhasAPI.Data;
 using MilhasAPI.Models;
+using MilhasAPI.Services.Interfaces;
 
 namespace MilhasAPI.Controllers;
 
@@ -11,65 +8,46 @@ namespace MilhasAPI.Controllers;
 [Route("api/[controller]")]
 public class CreditCardsController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly ICreditCardService _cardService;
 
-    public CreditCardsController(ApplicationDbContext db)
+    public CreditCardsController(ICreditCardService cardService)
     {
-        _db = db;
+        _cardService = cardService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CreditCard>>> Get()
-    {
-        return await _db.CreditCards.ToListAsync();
-    }
+        => Ok(await _cardService.GetAllAsync());
 
     [HttpGet("{id}")]
     public async Task<ActionResult<CreditCard>> Get(int id)
     {
-        var card = await _db.CreditCards.FindAsync(id);
+        var card = await _cardService.GetByIdAsync(id);
         if (card == null) return NotFound();
-        return card;
+        return Ok(card);
     }
 
     [HttpPost]
     public async Task<ActionResult<CreditCard>> Post(CreateCreditCardDto dto)
     {
-        if (!await _db.Users.AnyAsync(u => u.Id == dto.UserId))
-            return NotFound("Usuário não encontrado.");
-
-        var card = new CreditCard
-        {
-            CardNumber = dto.CardNumber,
-            Brand = dto.Brand,
-            UserId = dto.UserId
-        };
-
-        _db.CreditCards.Add(card);
-        await _db.SaveChangesAsync();
-        return CreatedAtAction(nameof(Get), new { id = card.Id }, card);
+        var (card, error) = await _cardService.CreateAsync(dto);
+        if (error != null) return NotFound(error);
+        return CreatedAtAction(nameof(Get), new { id = card!.Id }, card);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, UpdateCreditCardDto dto)
     {
-        var card = await _db.CreditCards.FindAsync(id);
-        if (card == null) return NotFound();
-
-        if (dto.CardNumber != null) card.CardNumber = dto.CardNumber;
-        if (dto.Brand != null) card.Brand = dto.Brand;
-
-        await _db.SaveChangesAsync();
+        var updated = await _cardService.UpdateAsync(id, dto);
+        if (!updated) return NotFound();
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var card = await _db.CreditCards.FindAsync(id);
-        if (card == null) return NotFound();
-        _db.CreditCards.Remove(card);
-        await _db.SaveChangesAsync();
+        var deleted = await _cardService.DeleteAsync(id);
+        if (!deleted) return NotFound();
         return NoContent();
     }
 }
