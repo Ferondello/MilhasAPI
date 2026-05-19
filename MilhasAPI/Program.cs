@@ -24,16 +24,27 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // ── CORS — permite o frontend React acessar a API ──────────────────
+// Origens vêm da configuração (AllowedOrigins, separadas por vírgula).
+// Em dev caímos no fallback de localhost; em produção definir a var de ambiente
+// AllowedOrigins com a URL pública do frontend.
+var configuredOrigins = (builder.Configuration["AllowedOrigins"] ?? "")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+var allowedOrigins = configuredOrigins.Length > 0
+    ? configuredOrigins
+    : new[]
+    {
+        "http://localhost:5173",   // Vite dev server (padrão)
+        "http://localhost:4173",   // Vite preview
+        "http://localhost:3000"    // fallback
+    };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:5173",   // Vite dev server (padrão)
-                "http://localhost:4173",   // Vite preview
-                "http://localhost:3000"    // fallback
-            )
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -81,11 +92,11 @@ builder.Services.AddHostedService<MilesScraperJob>();
 
 var app = builder.Build();
 
-// ── Seed do banco ──────────────────────────────────────────────────
+// ── Migrations do banco ────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 }
 
 // ── Swagger UI ─────────────────────────────────────────────────────
@@ -98,7 +109,11 @@ if (app.Environment.IsDevelopment())
 // ── CORS antes de tudo ─────────────────────────────────────────────
 app.UseCors("FrontendPolicy");
 
-app.UseHttpsRedirection();
+// Em produção (Railway/etc.) o TLS é terminado na borda e o container recebe
+// HTTP; o redirect ativo causa loop. Mantemos só em dev.
+if (app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 
