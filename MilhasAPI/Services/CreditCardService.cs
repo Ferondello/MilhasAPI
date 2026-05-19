@@ -31,6 +31,7 @@ public class CreditCardService : ICreditCardService
         {
             CardNumber = dto.CardNumber,
             Brand = dto.Brand,
+            Program = dto.Program,
             UserId = dto.UserId
         };
 
@@ -45,6 +46,7 @@ public class CreditCardService : ICreditCardService
 
         if (dto.CardNumber != null) card.CardNumber = dto.CardNumber;
         if (dto.Brand != null) card.Brand = dto.Brand;
+        if (dto.Program != null) card.Program = dto.Program;
 
         await _cardRepository.UpdateAsync(card);
         return true;
