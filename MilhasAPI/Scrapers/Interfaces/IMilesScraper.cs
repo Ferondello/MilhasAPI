@@ -3,14 +3,15 @@ using MilhasAPI.Scrapers.Models;
 namespace MilhasAPI.Scrapers.Interfaces;
 
 /// <summary>
-/// Contrato para qualquer scraper de programa de milhas.
-/// Cada implementação é responsável por um único programa (Smiles, Latam, Livelo...).
+/// Contrato para qualquer scraper de cotações de milhas.
+/// Um scraper pode cobrir múltiplos programas a partir de uma mesma fonte
+/// (ex: um agregador de notícias que publica preços de Smiles, Latam, etc.).
 /// </summary>
 public interface IMilesScraper
 {
-    /// <summary>Nome do programa de milhas que este scraper atende.</summary>
-    string ProgramName { get; }
+    /// <summary>Nome/identificação da fonte (usado em logs).</summary>
+    string SourceName { get; }
 
-    /// <summary>Busca a cotação atual de milhas do programa.</summary>
-    Task<MilesQuote?> ScrapeAsync(CancellationToken cancellationToken = default);
+    /// <summary>Busca as cotações disponíveis na fonte. Retorna lista vazia em caso de falha.</summary>
+    Task<IEnumerable<MilesQuote>> ScrapeAsync(CancellationToken cancellationToken = default);
 }

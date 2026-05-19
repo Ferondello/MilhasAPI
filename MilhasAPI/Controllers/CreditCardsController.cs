@@ -31,7 +31,7 @@ public class CreditCardsController : ControllerBase
     public async Task<ActionResult<CreditCard>> Post(CreateCreditCardDto dto)
     {
         var (card, error) = await _cardService.CreateAsync(dto);
-        if (error != null) return NotFound(error);
+        if (error != null) return NotFound(new { message = error });
         return CreatedAtAction(nameof(Get), new { id = card!.Id }, card);
     }
 

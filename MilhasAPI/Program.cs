@@ -66,10 +66,10 @@ builder.Services.AddHttpClient("ScraperClient", client =>
 });
 
 // ── Scrapers ───────────────────────────────────────────────────────
-builder.Services.AddScoped<IMilesScraper, SmilesScraper>();
-builder.Services.AddScoped<IMilesScraper, LatamScraper>();
-builder.Services.AddScoped<IMilesScraper, LiveloScraper>();
-builder.Services.AddScoped<IMilesScraper, TudoAzulScraper>();
+// Hoje uma única fonte SSR (MelhoresDestinos) cobre múltiplos programas.
+// Novos scrapers podem ser adicionados aqui — o MilesMonitorService deduplica
+// por programa mantendo a menor cotação.
+builder.Services.AddScoped<IMilesScraper, MelhoresDestinosScraper>();
 
 // ── Monitor ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IMilesMonitorService, MilesMonitorService>();
