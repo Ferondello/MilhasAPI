@@ -13,4 +13,6 @@ public interface IUserService
     // Auth
     Task<(User? User, string? Error)> RegisterAsync(RegisterDto dto);
     Task<User?> ValidateCredentialsAsync(string email, string password);
+    Task<User?> GetByEmailAsync(string email);
+    Task<bool>  ResetPasswordAsync(string email, string newPassword);
 }

@@ -67,6 +67,8 @@ builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<ICreditCardService, CreditCardService>();
 builder.Services.AddScoped<IRewardTransactionService, RewardTransactionService>();
 builder.Services.AddScoped<IMilesGoalService, MilesGoalService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IPasswordResetService, PasswordResetService>();
 
 // ── HttpClient para scrapers ───────────────────────────────────────
 var scraperConfig = builder.Configuration.GetSection("Scraper");

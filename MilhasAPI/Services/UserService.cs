@@ -79,4 +79,17 @@ public class UserService : IUserService
 
         return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash) ? user : null;
     }
+
+    public Task<User?> GetByEmailAsync(string email)
+        => _userRepository.GetByEmailAsync(email);
+
+    public async Task<bool> ResetPasswordAsync(string email, string newPassword)
+    {
+        var user = await _userRepository.GetByEmailAsync(email);
+        if (user == null) return false;
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _userRepository.UpdateAsync(user);
+        return true;
+    }
 }
