@@ -14,6 +14,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<CreditCard> CreditCards { get; set; }
     public DbSet<RewardTransaction> RewardTransactions { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<MilesGoal> MilesGoals { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

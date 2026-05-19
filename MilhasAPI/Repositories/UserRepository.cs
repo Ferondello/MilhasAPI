@@ -16,6 +16,7 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<User>> GetAllAsync()
         => 
+        
         await _db.Users
             .Include(u => u.CreditCards)
             .Include(u => u.Profile)

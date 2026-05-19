@@ -48,12 +48,14 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<ICreditCardRepository, CreditCardRepository>();
 builder.Services.AddScoped<IRewardTransactionRepository, RewardTransactionRepository>();
+builder.Services.AddScoped<IMilesGoalRepository, MilesGoalRepository>();
 
 // ── Services ───────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<ICreditCardService, CreditCardService>();
 builder.Services.AddScoped<IRewardTransactionService, RewardTransactionService>();
+builder.Services.AddScoped<IMilesGoalService, MilesGoalService>();
 
 // ── HttpClient para scrapers ───────────────────────────────────────
 var scraperConfig = builder.Configuration.GetSection("Scraper");
