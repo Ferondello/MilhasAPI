@@ -26,6 +26,13 @@ public class UserRepository : IUserRepository
             .Include(u => u.Profile)
             .FirstOrDefaultAsync(u => u.Id == id);
 
+    public async Task<User?> GetByEmailAsync(string email)
+        => await _db.Users
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+
+    public async Task<bool> EmailExistsAsync(string email)
+        => await _db.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower());
+
     public async Task<User> CreateAsync(User user)
     {
         _db.Users.Add(user);
