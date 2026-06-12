@@ -22,6 +22,9 @@ public class RewardTransactionService : IRewardTransactionService
     public async Task<IEnumerable<RewardTransaction>> GetByUserIdAsync(int userId)
         => await _transactionRepository.GetByUserIdAsync(userId);
 
+    public async Task<IEnumerable<RewardTransaction>> GetByCardIdAsync(int cardId)
+        => await _transactionRepository.GetByCardIdAsync(cardId);
+
     public async Task<RewardTransaction> CreateAsync(RewardTransaction transaction)
         => await _transactionRepository.CreateAsync(transaction);
 
