@@ -24,6 +24,14 @@ public class CreditCardService : ICreditCardService
         return cards;
     }
 
+    public async Task<IEnumerable<CreditCard>> GetByUserIdAsync(int userId)
+    {
+        var cards = await _cardRepository.GetByUserIdAsync(userId);
+        foreach (var card in cards)
+            card.CardNumber = CardNumberMasker.Mask(card.CardNumber);
+        return cards;
+    }
+
     public async Task<CreditCard?> GetByIdAsync(int id)
     {
         var card = await _cardRepository.GetByIdAsync(id);

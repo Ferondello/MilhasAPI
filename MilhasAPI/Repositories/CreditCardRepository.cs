@@ -17,6 +17,9 @@ public class CreditCardRepository : ICreditCardRepository
     public async Task<IEnumerable<CreditCard>> GetAllAsync()
         => await _db.CreditCards.ToListAsync();
 
+    public async Task<IEnumerable<CreditCard>> GetByUserIdAsync(int userId)
+        => await _db.CreditCards.Where(c => c.UserId == userId).ToListAsync();
+
     public async Task<CreditCard?> GetByIdAsync(int id)
         => await _db.CreditCards.FindAsync(id);
 
