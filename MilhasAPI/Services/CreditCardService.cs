@@ -1,6 +1,7 @@
 using MilhasAPI.Models;
 using MilhasAPI.Repositories.Interfaces;
 using MilhasAPI.Services.Interfaces;
+using MilhasAPI.Utils;
 
 namespace MilhasAPI.Services;
 
@@ -16,10 +17,20 @@ public class CreditCardService : ICreditCardService
     }
 
     public async Task<IEnumerable<CreditCard>> GetAllAsync()
-        => await _cardRepository.GetAllAsync();
+    {
+        var cards = await _cardRepository.GetAllAsync();
+        foreach (var card in cards)
+            card.CardNumber = CardNumberMasker.Mask(card.CardNumber);
+        return cards;
+    }
 
     public async Task<CreditCard?> GetByIdAsync(int id)
-        => await _cardRepository.GetByIdAsync(id);
+    {
+        var card = await _cardRepository.GetByIdAsync(id);
+        if (card != null)
+            card.CardNumber = CardNumberMasker.Mask(card.CardNumber);
+        return card;
+    }
 
     public async Task<(CreditCard? Card, string? Error)> CreateAsync(CreateCreditCardDto dto)
     {

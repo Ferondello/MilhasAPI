@@ -9,10 +9,12 @@ namespace MilhasAPI.Controllers;
 public class CreditCardsController : ControllerBase
 {
     private readonly ICreditCardService _cardService;
+    private readonly IRewardTransactionService _transactionService;
 
-    public CreditCardsController(ICreditCardService cardService)
+    public CreditCardsController(ICreditCardService cardService, IRewardTransactionService transactionService)
     {
         _cardService = cardService;
+        _transactionService = transactionService;
     }
 
     [HttpGet]
@@ -25,6 +27,25 @@ public class CreditCardsController : ControllerBase
         var card = await _cardService.GetByIdAsync(id);
         if (card == null) return NotFound();
         return Ok(card);
+    }
+
+    [HttpGet("{id}/transactions")]
+    public async Task<IActionResult> GetTransactions(int id)
+    {
+        var card = await _cardService.GetByIdAsync(id);
+        if (card == null) return NotFound();
+
+        var transactions = await _transactionService.GetByCardIdAsync(id);
+        var result = transactions.Select(t => new
+        {
+            t.Id,
+            t.Date,
+            t.Amount,
+            t.MilesEarned,
+            t.CreditCardId,
+        });
+
+        return Ok(result);
     }
 
     [HttpPost]

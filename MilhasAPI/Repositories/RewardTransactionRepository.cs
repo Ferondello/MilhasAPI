@@ -32,6 +32,13 @@ public class RewardTransactionRepository : IRewardTransactionRepository
             .Where(r => r.UserId == userId)
             .ToListAsync();
 
+    public async Task<IEnumerable<RewardTransaction>> GetByCardIdAsync(int cardId)
+        => await _db.RewardTransactions
+            .Include(r => r.CreditCard)
+            .Where(r => r.CreditCardId == cardId)
+            .OrderByDescending(r => r.Date)
+            .ToListAsync();
+
     public async Task<RewardTransaction> CreateAsync(RewardTransaction transaction)
     {
         _db.RewardTransactions.Add(transaction);
