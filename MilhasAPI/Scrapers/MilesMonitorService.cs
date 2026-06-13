@@ -7,26 +7,34 @@ namespace MilhasAPI.Scrapers;
 /// Orquestra todos os scrapers registrados via injeção de dependência e consolida
 /// os resultados num único conjunto de cotações por programa. Quando um programa
 /// esperado pela UI não tem dado real no ciclo, gera uma estimativa via
-/// <see cref="MockMilesQuoteFactory"/> pra manter a tela sempre populada.
+/// <see cref="IMilesQuoteEstimator"/> pra manter a tela sempre populada.
+///
+/// O resultado consolidado é guardado no <see cref="IQuotesCache"/> (singleton),
+/// de onde as requisições HTTP leem sem disparar nova coleta.
 /// </summary>
 public class MilesMonitorService : IMilesMonitorService
 {
     /// <summary>
     /// Programas que a UI espera sempre exibir. Se um scraper não trouxer dado real
-    /// pra algum deles, completamos com mock.
+    /// pra algum deles, completamos com estimativa.
     /// </summary>
     private static readonly string[] ExpectedPrograms =
         { "Smiles", "Latam Pass", "Livelo", "TudoAzul" };
 
     private readonly IEnumerable<IMilesScraper> _scrapers;
+    private readonly IMilesQuoteEstimator _estimator;
+    private readonly IQuotesCache _cache;
     private readonly ILogger<MilesMonitorService> _logger;
 
-    private readonly List<MilesQuote> _latestQuotes = new();
-    private readonly SemaphoreSlim _lock = new(1, 1);
-
-    public MilesMonitorService(IEnumerable<IMilesScraper> scrapers, ILogger<MilesMonitorService> logger)
+    public MilesMonitorService(
+        IEnumerable<IMilesScraper> scrapers,
+        IMilesQuoteEstimator estimator,
+        IQuotesCache cache,
+        ILogger<MilesMonitorService> logger)
     {
         _scrapers = scrapers;
+        _estimator = estimator;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -44,12 +52,12 @@ public class MilesMonitorService : IMilesMonitorService
             .ToDictionary(g => g.Key, g => g.OrderBy(q => q.PricePerMile).First(),
                           StringComparer.OrdinalIgnoreCase);
 
-        // Preenche mock para programas esperados que ficaram fora.
+        // Preenche estimativa para programas esperados que ficaram fora.
         foreach (var program in ExpectedPrograms)
         {
             if (!byProgram.ContainsKey(program))
             {
-                byProgram[program] = MockMilesQuoteFactory.GenerateFor(program);
+                byProgram[program] = _estimator.GenerateFor(program);
                 _logger.LogInformation("[{Program}] sem dado real — usando estimativa.", program);
             }
         }
@@ -58,16 +66,7 @@ public class MilesMonitorService : IMilesMonitorService
             .OrderBy(q => q.PricePerMile)
             .ToList();
 
-        await _lock.WaitAsync(cancellationToken);
-        try
-        {
-            _latestQuotes.Clear();
-            _latestQuotes.AddRange(consolidated);
-        }
-        finally
-        {
-            _lock.Release();
-        }
+        _cache.Replace(consolidated);
 
         _logger.LogInformation("Coleta finalizada. {Count} cotação(ões) no cache.", consolidated.Count);
         return consolidated;
@@ -82,5 +81,5 @@ public class MilesMonitorService : IMilesMonitorService
     }
 
     public Task<IEnumerable<MilesQuote>> GetLatestQuotesAsync()
-        => Task.FromResult<IEnumerable<MilesQuote>>(_latestQuotes.ToList());
+        => Task.FromResult<IEnumerable<MilesQuote>>(_cache.GetAll());
 }

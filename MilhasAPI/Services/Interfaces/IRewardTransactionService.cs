@@ -8,6 +8,6 @@ public interface IRewardTransactionService
     Task<RewardTransaction?> GetByIdAsync(int id);
     Task<IEnumerable<RewardTransaction>> GetByUserIdAsync(int userId);
     Task<IEnumerable<RewardTransaction>> GetByCardIdAsync(int cardId);
-    Task<RewardTransaction> CreateAsync(RewardTransaction transaction);
+    Task<RewardTransaction> CreateAsync(CreateRewardTransactionDto dto);
     Task<bool> DeleteAsync(int id);
 }

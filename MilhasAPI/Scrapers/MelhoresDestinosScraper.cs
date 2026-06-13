@@ -14,7 +14,7 @@ namespace MilhasAPI.Scrapers;
 /// Cada bloco de promoção contém o programa de destino (Smiles, Latam Pass, etc.)
 /// e o preço do milheiro quando aplicável. Quando o site não cobre algum dos
 /// programas conhecidos, o MilesMonitorService preenche com uma estimativa via
-/// MockMilesQuoteFactory.
+/// IMilesQuoteEstimator.
 /// </summary>
 public class MelhoresDestinosScraper : BaseMilesScraper
 {

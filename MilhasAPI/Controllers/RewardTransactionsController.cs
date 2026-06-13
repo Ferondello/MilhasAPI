@@ -32,9 +32,11 @@ public class RewardTransactionsController : ControllerBase
         => Ok(await _transactionService.GetByUserIdAsync(userId));
 
     [HttpPost]
-    public async Task<ActionResult<RewardTransaction>> Post(RewardTransaction tx)
+    public async Task<ActionResult<RewardTransaction>> Post(CreateRewardTransactionDto dto)
     {
-        var created = await _transactionService.CreateAsync(tx);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var created = await _transactionService.CreateAsync(dto);
         return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 

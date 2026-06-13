@@ -16,23 +16,19 @@ public class CreditCardService : ICreditCardService
         _userRepository = userRepository;
     }
 
-    public async Task<IEnumerable<CreditCard>> GetAllAsync()
+    public async Task<IEnumerable<CreditCardResponseDto>> GetAllAsync()
     {
         var cards = await _cardRepository.GetAllAsync();
-        foreach (var card in cards)
-            card.CardNumber = CardNumberMasker.Mask(card.CardNumber);
-        return cards;
+        return cards.Select(ToResponseDto).ToList();
     }
 
-    public async Task<CreditCard?> GetByIdAsync(int id)
+    public async Task<CreditCardResponseDto?> GetByIdAsync(int id)
     {
         var card = await _cardRepository.GetByIdAsync(id);
-        if (card != null)
-            card.CardNumber = CardNumberMasker.Mask(card.CardNumber);
-        return card;
+        return card == null ? null : ToResponseDto(card);
     }
 
-    public async Task<(CreditCard? Card, string? Error)> CreateAsync(CreateCreditCardDto dto)
+    public async Task<(CreditCardResponseDto? Card, string? Error)> CreateAsync(CreateCreditCardDto dto)
     {
         var userExists = await _userRepository.GetByIdAsync(dto.UserId);
         if (userExists == null)
@@ -47,7 +43,7 @@ public class CreditCardService : ICreditCardService
         };
 
         var created = await _cardRepository.CreateAsync(card);
-        return (created, null);
+        return (ToResponseDto(created), null);
     }
 
     public async Task<bool> UpdateAsync(int id, UpdateCreditCardDto dto)
@@ -71,4 +67,15 @@ public class CreditCardService : ICreditCardService
         await _cardRepository.DeleteAsync(card);
         return true;
     }
+
+    // Mapeia a entidade para saída, mascarando o número — sem mutar a entidade
+    // rastreada pelo EF (evita persistir o valor mascarado por engano).
+    private static CreditCardResponseDto ToResponseDto(CreditCard card) => new()
+    {
+        Id = card.Id,
+        CardNumber = CardNumberMasker.Mask(card.CardNumber),
+        Brand = card.Brand,
+        Program = card.Program,
+        UserId = card.UserId,
+    };
 }

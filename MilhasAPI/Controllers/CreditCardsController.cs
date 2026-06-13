@@ -18,11 +18,11 @@ public class CreditCardsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CreditCard>>> Get()
+    public async Task<ActionResult<IEnumerable<CreditCardResponseDto>>> Get()
         => Ok(await _cardService.GetAllAsync());
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CreditCard>> Get(int id)
+    public async Task<ActionResult<CreditCardResponseDto>> Get(int id)
     {
         var card = await _cardService.GetByIdAsync(id);
         if (card == null) return NotFound();
@@ -49,7 +49,7 @@ public class CreditCardsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CreditCard>> Post(CreateCreditCardDto dto)
+    public async Task<ActionResult<CreditCardResponseDto>> Post(CreateCreditCardDto dto)
     {
         var (card, error) = await _cardService.CreateAsync(dto);
         if (error != null) return NotFound(new { message = error });

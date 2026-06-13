@@ -25,8 +25,20 @@ public class RewardTransactionService : IRewardTransactionService
     public async Task<IEnumerable<RewardTransaction>> GetByCardIdAsync(int cardId)
         => await _transactionRepository.GetByCardIdAsync(cardId);
 
-    public async Task<RewardTransaction> CreateAsync(RewardTransaction transaction)
-        => await _transactionRepository.CreateAsync(transaction);
+    public async Task<RewardTransaction> CreateAsync(CreateRewardTransactionDto dto)
+    {
+        var transaction = new RewardTransaction
+        {
+            UserId = dto.UserId,
+            CreditCardId = dto.CreditCardId,
+            Date = dto.Date,
+            Amount = dto.Amount,
+            MilesEarned = dto.MilesEarned,
+            Program = dto.Program,
+        };
+
+        return await _transactionRepository.CreateAsync(transaction);
+    }
 
     public async Task<bool> DeleteAsync(int id)
     {

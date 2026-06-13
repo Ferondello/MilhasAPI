@@ -1,3 +1,4 @@
+using MilhasAPI.Scrapers.Interfaces;
 using MilhasAPI.Scrapers.Models;
 
 namespace MilhasAPI.Scrapers;
@@ -8,9 +9,9 @@ namespace MilhasAPI.Scrapers;
 /// (em R$ por milheiro). O frontend exibe a marcação "Estimativa" no campo
 /// <see cref="MilesQuote.PromotionDescription"/>.
 /// </summary>
-public static class MockMilesQuoteFactory
+public class MilesQuoteEstimator : IMilesQuoteEstimator
 {
-    private static readonly Random _random = new();
+    private readonly Random _random = new();
 
     // Faixas em R$ por milheiro (1.000 milhas). São divididas por 1000 antes de gravar.
     private static readonly Dictionary<string, (decimal Min, decimal Max)> Ranges =
@@ -32,7 +33,7 @@ public static class MockMilesQuoteFactory
             ["TudoAzul"]   = "https://tudoazul.voeazul.com.br",
         };
 
-    public static MilesQuote GenerateFor(string program)
+    public MilesQuote GenerateFor(string program)
     {
         var range = Ranges.TryGetValue(program, out var r) ? r : (Min: 15.00m, Max: 25.00m);
         var pricePerMilheiro = range.Min + (decimal)_random.NextDouble() * (range.Max - range.Min);

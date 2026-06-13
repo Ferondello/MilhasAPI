@@ -61,13 +61,21 @@ builder.Services.AddScoped<ICreditCardRepository, CreditCardRepository>();
 builder.Services.AddScoped<IRewardTransactionRepository, RewardTransactionRepository>();
 builder.Services.AddScoped<IMilesGoalRepository, MilesGoalRepository>();
 
+// ── Options ────────────────────────────────────────────────────────
+builder.Services.Configure<MilhasAPI.Configuration.EmailOptions>(
+    builder.Configuration.GetSection(MilhasAPI.Configuration.EmailOptions.SectionName));
+
 // ── Services ───────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<ICreditCardService, CreditCardService>();
 builder.Services.AddScoped<IRewardTransactionService, RewardTransactionService>();
 builder.Services.AddScoped<IMilesGoalService, MilesGoalService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IEmailTemplateRenderer, EmailTemplateRenderer>();
+builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddSingleton<IPasswordResetService, PasswordResetService>();
 
 // ── HttpClient para scrapers ───────────────────────────────────────
@@ -85,6 +93,10 @@ builder.Services.AddHttpClient("ScraperClient", client =>
 // Novos scrapers podem ser adicionados aqui — o MilesMonitorService deduplica
 // por programa mantendo a menor cotação.
 builder.Services.AddScoped<IMilesScraper, MelhoresDestinosScraper>();
+
+// ── Estimador (fallback) e cache de cotações ───────────────────────
+builder.Services.AddSingleton<IMilesQuoteEstimator, MilesQuoteEstimator>();
+builder.Services.AddSingleton<IQuotesCache, QuotesCache>();
 
 // ── Monitor ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IMilesMonitorService, MilesMonitorService>();

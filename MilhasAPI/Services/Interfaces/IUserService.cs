@@ -9,10 +9,4 @@ public interface IUserService
     Task<User> CreateAsync(CreateUserDto dto);
     Task<bool> UpdateAsync(int id, UpdateUserDto dto);
     Task<bool> DeleteAsync(int id);
-
-    // Auth
-    Task<(User? User, string? Error)> RegisterAsync(RegisterDto dto);
-    Task<User?> ValidateCredentialsAsync(string email, string password);
-    Task<User?> GetByEmailAsync(string email);
-    Task<bool>  ResetPasswordAsync(string email, string newPassword);
 }

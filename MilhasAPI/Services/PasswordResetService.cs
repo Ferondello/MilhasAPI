@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using MilhasAPI.Services.Interfaces;
 
 namespace MilhasAPI.Services;
@@ -10,7 +11,7 @@ public class PasswordResetService : IPasswordResetService
 {
     private record Entry(string Code, DateTime ExpiresAt);
 
-    private readonly Dictionary<string, Entry> _store = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, Entry> _store = new(StringComparer.OrdinalIgnoreCase);
 
     public string GenerateCode(string email)
     {
@@ -26,12 +27,12 @@ public class PasswordResetService : IPasswordResetService
 
         if (DateTime.UtcNow > entry.ExpiresAt)
         {
-            _store.Remove(email);
+            _store.TryRemove(email, out _);
             return false;
         }
 
         return entry.Code == code;
     }
 
-    public void RemoveCode(string email) => _store.Remove(email);
+    public void RemoveCode(string email) => _store.TryRemove(email, out _);
 }
