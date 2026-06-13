@@ -21,6 +21,10 @@ public class CreditCardsController : ControllerBase
     public async Task<ActionResult<IEnumerable<CreditCardResponseDto>>> Get()
         => Ok(await _cardService.GetAllAsync());
 
+    [HttpGet("user/{userId}")]
+    public async Task<ActionResult<IEnumerable<CreditCardResponseDto>>> GetByUser(int userId)
+        => Ok(await _cardService.GetByUserIdAsync(userId));
+
     [HttpGet("{id}")]
     public async Task<ActionResult<CreditCardResponseDto>> Get(int id)
     {

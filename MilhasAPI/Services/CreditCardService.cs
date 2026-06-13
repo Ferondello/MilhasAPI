@@ -22,6 +22,12 @@ public class CreditCardService : ICreditCardService
         return cards.Select(ToResponseDto).ToList();
     }
 
+    public async Task<IEnumerable<CreditCardResponseDto>> GetByUserIdAsync(int userId)
+    {
+        var cards = await _cardRepository.GetByUserIdAsync(userId);
+        return cards.Select(ToResponseDto).ToList();
+    }
+
     public async Task<CreditCardResponseDto?> GetByIdAsync(int id)
     {
         var card = await _cardRepository.GetByIdAsync(id);
